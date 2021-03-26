@@ -1,10 +1,11 @@
-package com.bisoft.postgre;
+package com.bisoft.postgre.entity;
+
+import com.bisoft.postgre.model.SimpleEntity;
 
 import javax.persistence.*;
-import java.sql.Date;
 
 @Entity
 @Table(name = "dev_object", schema = "public", catalog = "pitc")
 public class PgDevObjectEntity extends SimpleEntity {
-	static private String file = "devobject";
+	static public String file = "devobject";
 }

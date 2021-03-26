@@ -1,8 +1,5 @@
-import com.bisoft.postgre.*;
+import com.bisoft.postgre.model.CSVItem;
 import org.hibernate.HibernateException;
-import org.hibernate.Metamodel;
-import org.hibernate.query.Query;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.neo4j.driver.AuthTokens;
@@ -12,17 +9,12 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Transaction;
 import org.neo4j.driver.TransactionWork;
 
-import javax.persistence.Entity;
 import javax.persistence.metamodel.EntityType;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,17 +40,7 @@ public class Main {
 	
 	public static void main(final String[] args) throws Exception {
 		Set<EntityType<?>> entities = ourSessionFactory.getMetamodel().getEntities();
-		final org.hibernate.Session session = getSession();
-		try {
-			for(EntityType entity: entities) {
-				System.out.println(entity.getName());
-				List result = session.createQuery(String.format("from %s", entity.getName())).list();
-				SaveTable(entity.getBindableJavaType(), result);
-			}
-
-		} finally {
-			session.close();
-		}
+		saveModel(entities);
 		
 		driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "admin" ) );
 		emptyNeo();
@@ -66,6 +48,20 @@ public class Main {
 		loadRelationData(entities.stream().map(EntityType::getBindableJavaType).filter(v -> v.getSimpleName().contains("Relation")).collect(Collectors.toList()));
 		driver.close();
 		
+	}
+	
+	private static void saveModel(Set<EntityType<?>> entities) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+		final org.hibernate.Session session = getSession();
+		try {
+			for(EntityType entity: entities) {
+				System.out.println(entity.getName());
+				List result = session.createQuery(String.format("from %s", entity.getName())).list();
+				SaveTable(entity.getBindableJavaType(), result);
+			}
+			
+		} finally {
+			session.close();
+		}
 	}
 	
 	private static void loadRelationData(List<Class<?>> entities) {
@@ -86,7 +82,8 @@ public class Main {
 							String val = "";
 							fromE = (String)entity.getField("fromEntity").get(val);
 							toE = (String)entity.getField("toEntity").get(val);
-							fn = String.format("relation_%s_%s",fromE, toE);//(String)(entity.getMethod("readFileName").invoke(null, null));
+							fn = (String)entity.getField("file").get(val);
+							// fn = String.format("relation_%s_%s",fromE, toE);//(String)(entity.getMethod("readFileName").invoke(null, null));
 							//fields = ((String) (entity.getMethod("readTitle").invoke(null, null))).split(",");
 						} catch (IllegalAccessException e) {
 							e.printStackTrace();
@@ -144,10 +141,12 @@ public class Main {
 					public String execute( Transaction tx )
 					{
 						String s = "";
+						String val = "";
 						String fn = null;
 						String[] fields = new String[]{};
 						try {
-								fn = (String)(entity.getMethod("readFileName").invoke(null, null));
+								// fn = (String)(entity.getMethod("readFileName").invoke(null, null));
+								fn = (String)entity.getField("file").get(val);
 							  fields = ((String) (entity.getMethod("readTitle").invoke(null, null))).split(",");
 						} catch (IllegalAccessException e) {
 								e.printStackTrace();
@@ -155,6 +154,8 @@ public class Main {
 								e.printStackTrace();
 						} catch (NoSuchMethodException e) {
 								e.printStackTrace();
+						} catch (NoSuchFieldException e) {
+							e.printStackTrace();
 						}
 						s = String.format("LOAD CSV WITH HEADERS FROM 'file:///pitc/%s.csv' AS row WITH row WHERE row.uid IS NOT NULL", fn);
 						String pars = Arrays.stream(fields).map(v -> String.format("%1$s: row.%1$s", v)).collect(Collectors.joining(","));
@@ -169,9 +170,14 @@ public class Main {
 		}
 	}
 	
-	private static void SaveTable(Class<?> itemClass, List<CSVItem> data) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		String fn = (String)itemClass.getMethod("readFileName").invoke(null, null);
+	private static void SaveTable(Class<?> itemClass, List<CSVItem> data) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+		// String fn = (String)itemClass.getMethod("readFileName").invoke(null, null);
 		String tl = (String)itemClass.getMethod("readTitle").invoke(null, null);
+		String val = "";
+		String fn = (String)itemClass.getField("file").get(val);
+		
+		
+		
 		fn = "C:\\Users\\Chebakov.AA\\neo4j\\import\\pitc\\" + fn + ".csv";
 		try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(fn), "UTF8")) { //"cp1251"
 			out.write(tl + "\r\n");

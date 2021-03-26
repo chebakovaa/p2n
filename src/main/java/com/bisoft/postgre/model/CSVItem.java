@@ -1,4 +1,4 @@
-package com.bisoft.postgre;
+package com.bisoft.postgre.model;
 
 public abstract class CSVItem implements ICSVItem{
 	

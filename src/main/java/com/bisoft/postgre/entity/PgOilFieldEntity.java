@@ -1,10 +1,12 @@
-package com.bisoft.postgre;
+package com.bisoft.postgre.entity;
+
+import com.bisoft.postgre.model.SimpleEntity;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "oil_field", schema = "public", catalog = "pitc")
 public class PgOilFieldEntity extends SimpleEntity {
-	static private String file = "oilfield";
+	static public String file = "oilfield";
 }
 

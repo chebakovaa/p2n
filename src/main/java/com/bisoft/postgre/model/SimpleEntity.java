@@ -1,4 +1,4 @@
-package com.bisoft.postgre;
+package com.bisoft.postgre.model;
 
 import javax.persistence.*;
 
@@ -6,7 +6,7 @@ import javax.persistence.*;
 public class SimpleEntity extends CSVItem {
 	private int id;
 	private String name;
-	static private String file = "simple";
+//	static private String file = "simple";
 	
 	@Id
 	@Column(name = "id")
@@ -52,8 +52,8 @@ public class SimpleEntity extends CSVItem {
 		return "uid,name";
 	}
 	
-	static public String readFileName() {
-		return file;
+	static public String readFileNamePrefix() {
+		return "";
 	}
 	
 	@Override
