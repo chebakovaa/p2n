@@ -15,6 +15,7 @@
         <mapping class="com.bisoft.postgre.entity.PgCDNGEntity"/>
         <mapping class="com.bisoft.postgre.entity.PgNsEntity"/>
         <mapping class="com.bisoft.postgre.entity.PgStratumEntity"/>
+        <mapping class="com.bisoft.postgre.entity.PgContourEntity"/>
         <mapping class="com.bisoft.postgre.relation.PgRelationWellDevobject"/>
         <mapping class="com.bisoft.postgre.relation.PgRelationWellBush"/>
         <mapping class="com.bisoft.postgre.relation.PgRelationWellNs"/>
@@ -28,6 +29,9 @@
         <mapping class="com.bisoft.postgre.relation.PgRelationStratumDevobject"/>
         <mapping class="com.bisoft.postgre.relation.PgRelationStratumWell"/>
         <mapping class="com.bisoft.postgre.relation.PgRelationDevobjectDevobject"/>
+        <mapping class="com.bisoft.postgre.relation.PgRelationContourOilfield"/>
+        <mapping class="com.bisoft.postgre.relation.PgRelationContourStratum"/>
+        <mapping class="com.bisoft.postgre.relation.PgRelationContourDevobject"/>
         <!-- <property name="connection.password"/> -->
 
         <!-- DB schema will be updated if needed -->
